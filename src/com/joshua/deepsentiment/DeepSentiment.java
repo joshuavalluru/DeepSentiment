@@ -6,6 +6,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.joshua.deepsentiment.facebook.FacebookGrabber;
 import com.joshua.deepsentiment.nasdaq.NasdaqReader;
 import com.joshua.deepsentiment.twitter.TwitterGrabber;
 
@@ -19,12 +20,23 @@ public class DeepSentiment {
         	NasdaqReader nasdaqReader = new NasdaqReader();
         	nasdaqReader.read();
         	
+        	System.out.println ("***************** TWITTER **********************");
         	TwitterGrabber twitterGrabber = new TwitterGrabber("data/handles/twitter-economists.txt");
         	twitterGrabber.connect();
         	twitterGrabber.grab();
         	
+        	System.out.println ("***********************************************");
+        	
+        	System.out.println ("***************** FACEBOOK *********************");
+        	FacebookGrabber facebookGrabber = new FacebookGrabber("data/handles/facebook-page-handles.txt");
+        	facebookGrabber.connect();
+        	facebookGrabber.grab();
+        	
+        	System.out.println ("***********************************************");
+        	
         	Vector<SocialGrabber> grabbers = new Vector<SocialGrabber>();
         	grabbers.addElement(twitterGrabber);
+        	grabbers.addElement(facebookGrabber);
         	
         	PostParser parser = new PostParser(grabbers, "data/whitelist-words.txt", nasdaqReader);
         	parser.parse();

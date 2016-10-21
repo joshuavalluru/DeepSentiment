@@ -39,64 +39,11 @@ public class TwitterGrabber extends SocialGrabber{
 	// Instance of the twitter API
 	private Twitter _twitter;
 	private AccessToken _accessToken;
-	private HashMap<String, Long> _latestIdForHandle;
 	
 	public TwitterGrabber(String handleListFilePath) {
 		super(handleListFilePath);
 		_twitter = new TwitterFactory().getInstance();
 		_accessToken = null;
-		_handleList = new Vector<String>();
-		readTwitterHandleList();
-		readLatestIds();
-	}
-	
-	private boolean readTwitterHandleList() {
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(_handleListFilePath)));
-			for (String handle = br.readLine(); handle != null; handle = br.readLine()) {
-				_handleList.addElement(handle.substring(1));
-			}
-			br.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		return true;
-	}
-	
-	private void readLatestIds() {
-		_latestIdForHandle = new HashMap<String, Long>();
-		for (String handle : _handleList) {
-			try {
-				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filePathForHandle(handle))));
-				String lastLine = null; 
-				String line;
-				// Rend until the end of the file (we are looking for the last tweet in the file.
-				while ((line = br.readLine()) != null) {
-					lastLine = line;
-				}
-				if (lastLine != null) {
-					String[] parts = lastLine.split(",");
-					_latestIdForHandle.put(handle, Long.parseLong(parts[0]));
-				} else {
-					_latestIdForHandle.put(handle, (long) -1);
-				}
-				
-			} catch (FileNotFoundException e) {
-				System.out.println("File not found for " + handle);
-				_latestIdForHandle.put(handle, (long) -1);
-				
-			} catch (IOException e) {
-				System.out.println("File couldn't be read found for " + handle);
-				_latestIdForHandle.put(handle, (long) -1);
-			}
-			System.out.println (handle + " " + _latestIdForHandle.get(handle));
-		}
 	}
 	
 	protected String filePathForHandle(String handle) {

@@ -77,10 +77,12 @@ public class PostParser {
 				Date d = SocialGrabber.DATE_FORMAT.parse(date, new ParsePosition(1));
 				System.out.print (date + " : ");
 				fw.write(date + ",");
+				
 				for (String word : _whitelist) {
 					System.out.print(word + "(" + _wordCount.get(date).get(word) + "),");
 					fw.write(_wordCount.get(date).get(word)+",");
 				}
+				
 				System.out.printf("NASDAQ_CHANGE(%.2f)\n",_nasdaqReader.daysChange(d));
 				fw.write(_nasdaqReader.daysChange(d) > 0 ? "1\n" : "0\n");
 			}
@@ -109,7 +111,7 @@ public class PostParser {
 	 */
 	
 	private void parseLine(String line) throws UnsupportedEncodingException {
-		// This CSV file has the following format <DATE>,<MESSAGE_ID>,<MESSAGE>
+		// This CSV file has the following format <MESSAGE_ID>,<DATE>,<MESSAGE>
 		String[] parts = line.split(",");
 		String date = parts[1];
 		if (_wordCount.get(date) == null) {
