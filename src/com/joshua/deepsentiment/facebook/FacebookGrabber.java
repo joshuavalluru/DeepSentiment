@@ -4,7 +4,6 @@ import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
-import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +20,6 @@ import facebook4j.Reading;
 import facebook4j.ResponseList;
 import facebook4j.conf.Configuration;
 import facebook4j.conf.ConfigurationBuilder;
-import twitter4j.Status;
 
 public class FacebookGrabber extends SocialGrabber {
 	
@@ -123,10 +121,4 @@ public class FacebookGrabber extends SocialGrabber {
 	protected String filePathForHandle(String handle) {
 		return "data/social-data/"+handle+"-facebook.csv";
 	}
-	
-	public static void main (String[] args) throws Exception {
-		FacebookGrabber grabber = new FacebookGrabber("data/handles/facebook-page-handles.txt");
-		grabber.grab();
-	}
-
 }
