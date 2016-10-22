@@ -67,26 +67,41 @@ public class PostParser {
 	 */
 	private void printWordCount() {
 		try {
-			FileWriter fw = new FileWriter("data/training/training.csv");
-			fw.write("Date,");
+			FileWriter fwHumanReadable = new FileWriter("data/training/training-human-readable.csv");
+			FileWriter fwTraining = new FileWriter("data/training/training.csv");
+			FileWriter fwTesting = new FileWriter("data/training/test.csv");
+			
+			fwHumanReadable.write("Date,");
 			for (String word : _whitelist) {
-				fw.write(word + ", ");
+				fwHumanReadable.write(word + ", ");
 			} 
-			fw.write("Label\n");
+			fwHumanReadable.write("Label\n");
+			
+			
 			for (String date : _wordCount.keySet()) {
+				
+				// We pick a random ~75% for training and rest for testing.
+				FileWriter testOrTraining = Math.random() <= 0.75 ? fwTraining : fwTesting;
+				
 				Date d = SocialGrabber.DATE_FORMAT.parse(date, new ParsePosition(1));
 				System.out.print (date + " : ");
-				fw.write(date + ",");
+				fwHumanReadable.write(date + ",");
+				testOrTraining.write(date + ",");
 				
 				for (String word : _whitelist) {
 					System.out.print(word + "(" + _wordCount.get(date).get(word) + "),");
-					fw.write(_wordCount.get(date).get(word)+",");
+					fwHumanReadable.write(_wordCount.get(date).get(word)+",");
+					testOrTraining.write(_wordCount.get(date).get(word)+",");
 				}
 				
 				System.out.printf("NASDAQ_CHANGE(%.2f)\n",_nasdaqReader.daysChange(d));
-				fw.write(_nasdaqReader.daysChange(d) > 0 ? "1\n" : "0\n");
+				fwHumanReadable.write(_nasdaqReader.daysChange(d) > 0 ? "1\n" : "0\n");
+				testOrTraining.write(_nasdaqReader.daysChange(d) > 0 ? "1\n" : "0\n");
 			}
-			fw.close();
+			
+			fwHumanReadable.close();
+			fwTraining.close();
+			fwTesting.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
