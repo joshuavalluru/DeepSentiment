@@ -38,9 +38,10 @@ hits = 0
 for index, line in enumerate(pred):
     line[1] *= 2
     prediction = np.argmax(line)
-    reality = testlabels[index][0]
+    reality = testlabels[index][1]
     if prediction == reality:
 	hits += 1
+    print('%s :  %s' % (prediction, reality)) 
 
 print ('Accuracy: %s' % (float(hits)/len(pred)))
 
