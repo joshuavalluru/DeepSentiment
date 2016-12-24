@@ -20,6 +20,7 @@ public class DeepSentiment {
         	NasdaqReader nasdaqReader = new NasdaqReader();
         	nasdaqReader.read();
         	
+        	// Now we download all the tweets
         	System.out.println ("***************** TWITTER **********************");
         	TwitterGrabber twitterGrabber = new TwitterGrabber("data/handles/twitter-economists.txt");
         	twitterGrabber.connect();
