@@ -28,6 +28,7 @@ public class DeepSentiment {
         	
         	System.out.println ("***********************************************");
         	
+        	// Now we download all the facebook posts
         	System.out.println ("***************** FACEBOOK *********************");
         	FacebookGrabber facebookGrabber = new FacebookGrabber("data/handles/facebook-page-handles.txt");
         	facebookGrabber.connect();
