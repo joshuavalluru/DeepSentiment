@@ -1,3 +1,64 @@
 economy
-good
+finance
 money
+crisis
+down
+fiscal
+inflation
+deflation
+up
+market up
+budget
+market down
+deficit
+sell
+buy
+Contango
+backwardation
+swap spread
+alpha
+volatility
+risk
+stock
+financial
+investor
+bull market
+bear market
+capital
+Commodity
+cost of equity
+credit rating
+debt
+dividend
+euro
+exchange rate
+dollar rate
+Federal Reserve
+futures
+GDP
+High Yield
+Hedge Fund
+Index
+Junk Bond
+Liquidity
+Liquidation
+Market Cap
+Market Capitalization
+Market Share
+Mutual Fund
+Nasdaq
+Dow Jones
+Nikkei
+Put
+Rally
+Retreat
+Sell-side
+Short
+Taxation
+Trading heavy
+Trading Low
+Uptick
+Yield
+Bearish
+crash
+Hawkish

@@ -160,10 +160,15 @@ public class PostParser {
 		_whitelist = new Vector<String>();
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(_whitelistFilePath)));
-			String word;
+			String line;
 			
-			while ((word = br.readLine()) != null) {
-				_whitelist.addElement(word);
+			while ((line = br.readLine()) != null) {
+				String[] words = line.split(" ");
+				for (String word : words) {
+					if (!_whitelist.contains(word)) { 
+						_whitelist.addElement(word);
+					}
+				}
 			}
 			
 			br.close();
