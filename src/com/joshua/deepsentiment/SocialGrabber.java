@@ -99,7 +99,7 @@ public abstract class SocialGrabber {
 				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filePathForHandle(handle))));
 				String lastLine = null; 
 				String line;
-				// Rend until the end of the file (we are looking for the last tweet in the file.
+				// Read until the end of the file (we are looking for the last tweet in the file.
 				while ((line = br.readLine()) != null) {
 					lastLine = line;
 				}
