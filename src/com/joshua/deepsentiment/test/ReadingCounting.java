@@ -23,7 +23,7 @@ public class ReadingCounting {
 				// count
 				dates.add(newDate);
 				whitelistCount.add(countWordOccurrences(cleanedUpPost, whitelist));
-			} else {
+			} else { // if date exists we merge the two array lists
 				whitelistCount.set(dateLocation, mergeRows(whitelistCount.get(dateLocation), countWordOccurrences(cleanedUpPost, whitelist)));
 			}
 		}
