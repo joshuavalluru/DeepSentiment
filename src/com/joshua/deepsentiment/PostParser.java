@@ -170,7 +170,6 @@ public class PostParser {
 					}
 				}
 			}
-			
 			br.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
