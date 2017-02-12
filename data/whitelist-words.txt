@@ -1,6 +1,3 @@
-economy
-finance
-money
 crisis
 down
 fiscal

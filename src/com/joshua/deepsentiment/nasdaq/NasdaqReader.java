@@ -26,14 +26,15 @@ public class NasdaqReader {
 	 * @param date
 	 * @return
 	 */
-	public double daysChange(Date date) {
+	public Double daysChange(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		cal.add(Calendar.DATE, -1);
 		Date previousDate = cal.getTime();
+		int count = 0;
 		
 		if (_closingValueMap.get(date) == null || _closingValueMap.get(previousDate) == null) {
-			return 0;
+			return null;
 		} else {
 			return _closingValueMap.get(date) - _closingValueMap.get(previousDate);
 		}
@@ -52,7 +53,7 @@ public class NasdaqReader {
 		// We use YAHOO api to download the historical NASDAQ index. It's already in CSV format.
 		// We will have to calculate the labels (up/down) from this.
 		
-		URL nasdaqYahooAPI = new URL("http://real-chart.finance.yahoo.com/table.csv?s=%5EIXIC&d=9&e=16&f=2016&g=d&a=1&b=5&c=1971&ignore=.csv");
+		URL nasdaqYahooAPI = new URL("http://chart.finance.yahoo.com/table.csv?s=^IXIC&a=1&b=5&c=1971&d=0&e=22&f=2017&g=d&ignore=.csv");
 		BufferedReader br = new BufferedReader(new InputStreamReader(nasdaqYahooAPI.openStream()));
 		
 		FileWriter fw = new FileWriter("data/nasdaq/history.csv");

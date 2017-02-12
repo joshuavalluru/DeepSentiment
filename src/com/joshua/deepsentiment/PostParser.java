@@ -9,13 +9,19 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Vector;
 
 import com.joshua.deepsentiment.nasdaq.NasdaqReader;
 
 public class PostParser {
+	public static final SimpleDateFormat SUFFIX_DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy");
+	
 	private Vector<SocialGrabber> _grabbers;
 	
 	// Path to the file containing the whitelist of words we are interested in.
@@ -46,6 +52,15 @@ public class PostParser {
 	 * @throws IOException
 	 */
 	public void parse() throws IOException {
+		parse(false);
+	}
+	
+	/**
+	 * Parses all the posts from all social grabbers and calculated the word count. If cumulative is true, 
+	 * then generates cumulative training files for all dates.
+	 * @throws IOException
+	 */
+	public void parse(boolean cumulative) throws IOException {
 		_wordCount = new HashMap<String, HashMap<String, Integer>>();
 		
 		for (SocialGrabber grabber : _grabbers) {
@@ -59,17 +74,57 @@ public class PostParser {
 			}
 		}
 		
-		printWordCount();
+		saveWordCountBefore(null);
+		
+		if (cumulative) {
+			Vector<Date> dates = getSortedMonths();
+
+			for (Date d : dates) {
+				saveWordCountBefore(d);
+			}
+		}
+	}
+	
+	private Vector<Date> getSortedMonths() {
+		Vector<Date> dates = new Vector<Date>();
+		for (String date : _wordCount.keySet()) {
+			Date d = SocialGrabber.DATE_FORMAT.parse(date, new ParsePosition(1));
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(d);
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			d = cal.getTime();
+			if (!dates.contains(d)) {
+				dates.addElement(d);
+			}
+		}
+		Collections.sort(dates);
+		return dates;
+	}
+	/* 
+	 * Returns all the dates in a sorted vector.
+	 */
+	private Vector<Date> getSortedDates() {
+		Vector<Date> dates = new Vector<Date>();
+		for (String date : _wordCount.keySet()) {
+			Date d = SocialGrabber.DATE_FORMAT.parse(date, new ParsePosition(1));
+			dates.addElement(d);
+		}
+		Collections.sort(dates);
+		return dates;
 	}
 	
 	/**
 	 * Prints the entire word count. Also saves it in a CSV file at data/training/training.csv
 	 */
-	private void printWordCount() {
+	private void saveWordCountBefore(Date beforeDate) {
 		try {
-			FileWriter fwHumanReadable = new FileWriter("data/training/training-human-readable.csv");
-			FileWriter fwTraining = new FileWriter("data/training/training.csv");
-			FileWriter fwTesting = new FileWriter("data/training/test.csv");
+			String dateSuffix = beforeDate == null ? "" : "-"+SUFFIX_DATE_FORMAT.format(beforeDate);
+			if (beforeDate != null) {
+				System.out.println("Generating training data until : "+ dateSuffix);
+			}
+			FileWriter fwHumanReadable = new FileWriter("data/training/training-human-readable"+dateSuffix+".csv");
+			FileWriter fwTraining = new FileWriter("data/training/training"+dateSuffix+".csv");
+			FileWriter fwTesting = new FileWriter("data/training/test"+dateSuffix+".csv");
 			
 			fwHumanReadable.write("Date,");
 			for (String word : _whitelist) {
@@ -77,26 +132,52 @@ public class PostParser {
 			} 
 			fwHumanReadable.write("Label\n");
 			
-			
-			for (String date : _wordCount.keySet()) {
+			// Sort the dates first to make the training file readable.
+			Vector<Date> dates = getSortedDates();
+
+			for (Date d : dates) {
+				
+				if (beforeDate != null && d.after(beforeDate)) {
+					continue;
+				}
 				
 				// We pick a random ~75% for training and rest for testing.
 				FileWriter testOrTraining = Math.random() <= 0.75 ? fwTraining : fwTesting;
 				
-				Date d = SocialGrabber.DATE_FORMAT.parse(date, new ParsePosition(1));
-				System.out.print (date + " : ");
-				fwHumanReadable.write(date + ",");
-				testOrTraining.write(date + ",");
+				// The date in the map has quotes in it.
+				String date = "\"" + SocialGrabber.DATE_FORMAT.format(d) + "\"";
 				
-				for (String word : _whitelist) {
-					System.out.print(word + "(" + _wordCount.get(date).get(word) + "),");
-					fwHumanReadable.write(_wordCount.get(date).get(word)+",");
-					testOrTraining.write(_wordCount.get(date).get(word)+",");
+				String lineToBeWritten = date + ",";
+				
+				if (beforeDate == null) {
+					System.out.print (date + " : ");
 				}
 				
-				System.out.printf("NASDAQ_CHANGE(%.2f)\n",_nasdaqReader.daysChange(d));
-				fwHumanReadable.write(_nasdaqReader.daysChange(d) > 0 ? "1\n" : "0\n");
-				testOrTraining.write(_nasdaqReader.daysChange(d) > 0 ? "1\n" : "0\n");
+				for (String word : _whitelist) {
+					if (beforeDate == null) {
+						System.out.print(word + "(" + _wordCount.get(date).get(word) + "),");
+					}
+					lineToBeWritten += (_wordCount.get(date).get(word)+",");
+				}
+				
+				if (_nasdaqReader.daysChange(d) == null) {
+					if (beforeDate == null) {
+						System.out.println();
+					}
+					continue;
+				}
+				
+				if (beforeDate == null) {
+					System.out.printf("NASDAQ_CHANGE(%.2f)\n",_nasdaqReader.daysChange(d));
+				}
+				
+				if (_nasdaqReader.daysChange(d) != null && _nasdaqReader.daysChange(d) > 0) {
+					lineToBeWritten += "1";
+				} else {
+					lineToBeWritten += "0";
+				}
+				fwHumanReadable.write(lineToBeWritten+"\n");
+				testOrTraining.write(lineToBeWritten+"\n");
 			}
 			
 			fwHumanReadable.close();
@@ -117,6 +198,7 @@ public class PostParser {
 			System.out.print(word + ", ");
 		}
 		System.out.println();
+		System.out.println("Number of words in the whitelist: " + _whitelist.size());
 	}
 	
 	/**

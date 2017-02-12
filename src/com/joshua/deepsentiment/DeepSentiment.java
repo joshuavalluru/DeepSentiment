@@ -41,7 +41,7 @@ public class DeepSentiment {
         	grabbers.addElement(facebookGrabber);
         	
         	PostParser parser = new PostParser(grabbers, "data/whitelist-words.txt", nasdaqReader);
-        	parser.parse();
+        	parser.parse(false);
         } catch (Exception ex)
         {
             Logger.getLogger(DeepSentiment.class.getName()).log(Level.SEVERE, null, ex);
