@@ -34,6 +34,9 @@ public class PostParser {
 	// For each date, we have a word count map. 
 	private HashMap<String, HashMap<String, Integer>> _wordCount;
 	
+	// For each date, we have a count of number of posts for that day. 
+	private HashMap<String, Integer> _postCount;
+	
 	/**
 	 * Initializer
 	 * @param grabbers - All the social grabbers to read the posts from.
@@ -62,6 +65,10 @@ public class PostParser {
 	 */
 	public void parse(boolean cumulative) throws IOException {
 		_wordCount = new HashMap<String, HashMap<String, Integer>>();
+		_postCount = new HashMap<String, Integer>();
+		
+		int totalPosts = 0;
+		
 		
 		for (SocialGrabber grabber : _grabbers) {
 			for (String handle : grabber._handleList) {
@@ -69,10 +76,13 @@ public class PostParser {
 				String line;
 				while ((line = br.readLine()) != null) {
 					parseLine(line);
+					totalPosts++;
 				}
 				br.close();
 			}
 		}
+		
+		System.out.println("Total Number of posts: " + totalPosts);
 		
 		saveWordCountBefore(null);
 		
@@ -125,6 +135,7 @@ public class PostParser {
 			FileWriter fwHumanReadable = new FileWriter("data/training/training-human-readable"+dateSuffix+".csv");
 			FileWriter fwTraining = new FileWriter("data/training/training"+dateSuffix+".csv");
 			FileWriter fwTesting = new FileWriter("data/training/test"+dateSuffix+".csv");
+			FileWriter fwPostCounts = new FileWriter("data/post-counts.csv");
 			
 			fwHumanReadable.write("Date,");
 			for (String word : _whitelist) {
@@ -134,7 +145,10 @@ public class PostParser {
 			
 			// Sort the dates first to make the training file readable.
 			Vector<Date> dates = getSortedDates();
-
+			
+			int numberOfPosts = 0;
+			int numberOfDays = 0;
+			
 			for (Date d : dates) {
 				
 				if (beforeDate != null && d.after(beforeDate)) {
@@ -150,8 +164,17 @@ public class PostParser {
 				String lineToBeWritten = date + ",";
 				
 				if (beforeDate == null) {
-					System.out.print (date + " : ");
+					System.out.print (date + "(" + _postCount.get(date) + ")" + " : ");
+					if (testOrTraining == fwTraining) {
+						numberOfPosts += _postCount.get(date);
+						numberOfDays++;
+						if (numberOfDays % 30 == 0) {
+							fwPostCounts.write(numberOfDays+","+numberOfPosts+"\n");
+						}
+					}
 				}
+				
+				
 				
 				for (String word : _whitelist) {
 					if (beforeDate == null) {
@@ -180,6 +203,9 @@ public class PostParser {
 				testOrTraining.write(lineToBeWritten+"\n");
 			}
 			
+			System.out.println(numberOfPosts);
+			
+			fwPostCounts.close();
 			fwHumanReadable.close();
 			fwTraining.close();
 			fwTesting.close();
@@ -213,9 +239,12 @@ public class PostParser {
 		String date = parts[1];
 		if (_wordCount.get(date) == null) {
 			_wordCount.put(date, new HashMap<String, Integer>());
+			_postCount.put(date, 1);
 			for (String word : _whitelist) {
 				_wordCount.get(date).put(word, 0);
 			}
+		} else {
+			_postCount.put(date, _postCount.get(date)+1);
 		}
 		
 		// Second index of , marks the beginning of the post (e.g., tweet).
